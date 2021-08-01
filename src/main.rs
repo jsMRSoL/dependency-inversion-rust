@@ -1,5 +1,11 @@
-struct LightBulb ();
-impl LightBulb {
+trait Switchable {
+    fn turn_on(&self) {}
+
+    fn turn_off(&self) {}
+}
+
+struct LightBulb();
+impl Switchable for LightBulb {
     fn turn_on(&self) {
         println!("Lightbulb: turned on...")
     }
@@ -9,34 +15,48 @@ impl LightBulb {
     }
 }
 
-struct ElectricPowerSwitch {
-    lightbulb: LightBulb,
+struct Fan();
+impl Switchable for Fan {
+    fn turn_on(&self) {
+        println!("Fan: turned on...")
+    }
+
+    fn turn_off(&self) {
+        println!("Fan: turned off...")
+    }
+}
+
+struct ElectricPowerSwitch<T> {
+    client: T,
     on: bool,
 }
 
-impl ElectricPowerSwitch {
-    fn new(l: LightBulb) -> Self {
-	Self {
-	    lightbulb: l,
-	    on: false,
-	}
+impl<T: Switchable> ElectricPowerSwitch<T> {
+    fn new(c: T) -> Self {
+        Self {
+            client: c,
+            on: false,
+        }
     }
 
     fn press(&mut self) {
-	if self.on {
-	    self.lightbulb.turn_off();
-	    self.on = false;
-	} else {
-	    self.lightbulb.turn_on();
-	    self.on = true;
-	}
-	
+        if self.on {
+            self.client.turn_off();
+            self.on = false;
+        } else {
+            self.client.turn_on();
+            self.on = true;
+        }
     }
 }
 
 fn main() {
     let l = LightBulb();
-    let mut switch = ElectricPowerSwitch::new(l);
-    switch.press();
-    switch.press();
+    let f = Fan();
+    let mut switch1 = ElectricPowerSwitch::new(l);
+    let mut switch2 = ElectricPowerSwitch::new(f);
+    switch1.press();
+    switch2.press();
+    switch1.press();
+    switch2.press();
 }
